@@ -9,11 +9,11 @@ namespace server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class InventoryController : ControllerBase
+    public class InventoriesController : ControllerBase
     {
         private readonly InventoryContext _context;
 
-        public InventoryController(InventoryContext context)
+        public InventoriesController(InventoryContext context)
         {
             _context = context;
         }
@@ -47,8 +47,9 @@ namespace server.Controllers
                 IQueryable<Inventory> inventoriesQuery = _context.Inventories.AsQueryable();
 
                 if (query.ContainsKey("location"))
-                    inventoriesQuery = inventoriesQuery
-                        .Where(i => i.Location == query["location"]);
+					if (query["location"] != "ყველა")
+						inventoriesQuery = inventoriesQuery
+							.Where(i => i.Location == query["location"]);
 
                 if (query.ContainsKey("name"))
                     inventoriesQuery = inventoriesQuery
@@ -138,14 +139,22 @@ namespace server.Controllers
                 faker.Address.City(), faker.Address.City(),
                 faker.Address.City(), faker.Address.City()
             };
+            string[] names =
+            {
+                "nugo", "bego", "cuca", "vaniko", faker.Commerce.ProductName(),
+                faker.Commerce.ProductName(), faker.Commerce.ProductName(),
+                faker.Commerce.ProductName(), faker.Commerce.ProductName(),
+                faker.Commerce.ProductName(), faker.Commerce.ProductName(),
+            };
             int locationsLength = locations.Length;
+            int namesLength = names.Length;
 
             for (int i = 0; i < numInventories;  i++)
             {
 
                 Inventory inventory = new Inventory()
                 {
-                    Name = faker.Commerce.ProductName(),
+                    Name = names[random.Next(namesLength)],
                     Location = locations[random.Next(locationsLength)],
                     Price = (long)faker.Random.Decimal(1, 1000)
                 };
