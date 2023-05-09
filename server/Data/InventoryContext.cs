@@ -14,9 +14,19 @@ namespace server.Data
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Inventory>()
                 .HasKey(x => x.Id);
+
             modelBuilder.Entity<Inventory>()
                 .Property(x => x.Id)
                 .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<Inventory>()
+                .HasIndex(x => x.Location);
+
+            modelBuilder.Entity<Inventory>()
+                .HasIndex(x => x.Name);
+
+            modelBuilder.Entity<Inventory>()
+                .HasIndex(x => x.Price);
         }
 
     }

@@ -32,60 +32,65 @@ namespace server.Controllers
                 int pagesAmount = amount / inventoriesPerPage;
                 if (amount % inventoriesPerPage > 0)
                     pagesAmount++;
-                
-                return Ok(new { inventories, amount, pagesAmount});
+
+                return Ok(new { inventories, amount, pagesAmount });
             }
             else
             {
                 int page;
+                string? orderBy = query.GetValueOrDefault("orderBy");
                 if (query.ContainsKey("page"))
                     page = int.Parse(query["page"]);
                 else
                     page = 1;
-                List<Inventory> inventories = await _context.Inventories
-                    .OrderBy(i => i.Name)
-                    .ToListAsync();
-                if (query.ContainsKey("location"))
-                    inventories = inventories
-                        .Where(i => i.Location == query["location"])
-                        .ToList();
-                
-                if (query.ContainsKey("name"))
-                    inventories = inventories
-                        .Where(i => i.Name == query["name"])
-                        .ToList();
-                
-                if (query.ContainsKey("orderBy"))
-                    switch (query["orderBy"])
-                    {
-                        case "name":
-                            inventories = inventories
-                                .OrderBy(result => result.Name)
-                                .ToList();
-                            break;
-                        case "price":
-                            inventories = inventories
-                                .OrderBy(result => result.Price)
-                                .ToList();
-                            break;
-                    }
-                
-                if (query.ContainsKey("orderType") && query["orderType"] == "desc")
-                    inventories.Reverse();
 
-                int amount = inventories.Count;
-                inventories = inventories
-                    .Skip(inventoriesPerPage * (page - 1))
-                    .Take(inventoriesPerPage)
-                    .ToList();
+                IQueryable<Inventory> inventoriesQuery = _context.Inventories.AsQueryable();
+
+                if (query.ContainsKey("location"))
+                    inventoriesQuery = inventoriesQuery
+                        .Where(i => i.Location == query["location"]);
+
+                if (query.ContainsKey("name"))
+                    inventoriesQuery = inventoriesQuery
+                        .Where(i => i.Name == query["name"]);
+
+                switch (orderBy)
+                {
+                    case "name":
+                        inventoriesQuery = inventoriesQuery
+                            .OrderBy(result => result.Name);
+                        break;
+                    case "price":
+                        inventoriesQuery = inventoriesQuery
+                            .OrderBy(result => result.Price);
+                        break;
+                    case "location":
+                        inventoriesQuery = inventoriesQuery
+                            .OrderBy(result => result.Location);
+                        break;
+                    default:
+                        inventoriesQuery = inventoriesQuery
+                            .OrderBy(result => result.Name);
+                        break;
+                }
+
+                if (query.ContainsKey("orderType") && query["orderType"] == "desc")
+                    inventoriesQuery = inventoriesQuery.Reverse();
+
+                int amount = inventoriesQuery.Count();
                 int pagesAmount = amount / inventoriesPerPage;
                 if (amount % inventoriesPerPage > 0)
                     pagesAmount++;
-                return Ok(new { inventories, amount, pagesAmount});
+
+                List<Inventory> inventories = await inventoriesQuery
+                        .Skip(inventoriesPerPage * (page - 1))
+                        .Take(inventoriesPerPage)
+                        .ToListAsync();
+
+                return Ok(new { inventories, amount, pagesAmount });
             }
-
-
         }
+
         [HttpPost]
         public async Task<IActionResult> AddInventory(AddInventoryRequest addInventoryRequest)
         {
