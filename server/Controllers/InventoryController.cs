@@ -105,6 +105,7 @@ namespace server.Controllers
         public async Task<IActionResult> DeleteInventory([FromRoute] int id)
         {
             Inventory? inventory = await _context.Inventories.FindAsync(id);
+			
             if (inventory == null)
             {
                 return BadRequest("Inventory doesn't exist!");
