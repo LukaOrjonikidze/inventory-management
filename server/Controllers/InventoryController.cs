@@ -46,13 +46,16 @@ namespace server.Controllers
                     .OrderBy(i => i.Name)
                     .ToListAsync();
                 if (query.ContainsKey("location"))
-                {
                     inventories = inventories
                         .Where(i => i.Location == query["location"])
                         .ToList();
-                }
+                
+                if (query.ContainsKey("name"))
+                    inventories = inventories
+                        .Where(i => i.Name == query["name"])
+                        .ToList();
+                
                 if (query.ContainsKey("orderBy"))
-                {
                     switch (query["orderBy"])
                     {
                         case "name":
@@ -66,11 +69,10 @@ namespace server.Controllers
                                 .ToList();
                             break;
                     }
-                }
+                
                 if (query.ContainsKey("orderType") && query["orderType"] == "desc")
-                {
                     inventories.Reverse();
-                }
+
                 int amount = inventories.Count;
                 inventories = inventories
                     .Skip(inventoriesPerPage * (page - 1))
@@ -117,17 +119,28 @@ namespace server.Controllers
         }
         [HttpPost]
         [Route("test")]
-        public async Task<IActionResult> InsertDummyInventories ()
+        public async Task<IActionResult> InsertDummyInventories (int numInventories)
         {
             Faker faker = new Faker();
-            const int numInventories = 10000;
+            Random random = new Random();
             List<Inventory> inventories = new List<Inventory>(numInventories);
+            string[] locations = {
+                "მთავარი ოფისი", "კავეა სითი მოლი",
+                "კავეა გალერეა", "კავეა ისთ ფოინთი",
+                "კავეა თბილისი მოლი", faker.Address.City(),
+                faker.Address.City(), faker.Address.City(),
+                faker.Address.City(), faker.Address.City(),
+                faker.Address.City(), faker.Address.City()
+            };
+            int locationsLength = locations.Length;
+
             for (int i = 0; i < numInventories;  i++)
             {
+
                 Inventory inventory = new Inventory()
                 {
                     Name = faker.Commerce.ProductName(),
-                    Location = faker.Address.City(),
+                    Location = locations[random.Next(locationsLength)],
                     Price = (long)faker.Random.Decimal(1, 1000)
                 };
                 inventories.Add(inventory);
