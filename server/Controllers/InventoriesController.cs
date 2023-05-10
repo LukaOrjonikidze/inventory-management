@@ -134,10 +134,7 @@ namespace server.Controllers
             string[] locations = {
                 "მთავარი ოფისი", "კავეა სითი მოლი",
                 "კავეა გალერეა", "კავეა ისთ ფოინთი",
-                "კავეა თბილისი მოლი", faker.Address.City(),
-                faker.Address.City(), faker.Address.City(),
-                faker.Address.City(), faker.Address.City(),
-                faker.Address.City(), faker.Address.City()
+                "კავეა თბილისი მოლი"
             };
             string[] names =
             {
