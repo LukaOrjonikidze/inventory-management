@@ -11,6 +11,7 @@ const Home: React.FC = () => {
     const [page, setPage] = useState<number>(1);
     const [orderBy, setOrderBy] = useState<string>("name");
     const [orderType, setOrderType] = useState<string>("asc");
+    const [render, setRender] = useState<boolean>(false);
 
 
     
@@ -25,7 +26,7 @@ const Home: React.FC = () => {
             console.log(data);
         });
 
-    }, [location, page, orderBy, orderType]);
+    }, [location, page, orderBy, orderType, render]);
 
     
 
@@ -52,8 +53,21 @@ const Home: React.FC = () => {
             prevValue === "price" ? setOrderType(prevValue => prevValue === "asc" ? "desc" : "asc")
             : setOrderType("asc");
             return "price";
-            
         });
+    }
+    const handleDelete = (id: number) => {
+        fetch(`https://localhost:7164/api/Inventories/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            setRender(prevValue => !prevValue);
+        });
+        
     }
 
 
@@ -83,6 +97,7 @@ const Home: React.FC = () => {
                         <th onClick={sortByPrice} style={{cursor: "pointer"}} scope="col">ფასი ₾
                         &nbsp; {orderBy === "price" ? orderType === "asc" ? '↑' : '↓' : null}
                         </th>
+                        <th> </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -91,6 +106,7 @@ const Home: React.FC = () => {
                             <td>{inventory.name}</td>
                             <td>{inventory.location}</td>
                             <td>{inventory.price.toString()}</td>
+                            <td onClick={() => handleDelete(inventory.id)} style={{cursor: "pointer"}}>🗑️</td>
                         </tr>
                     ))}
                 </tbody>
